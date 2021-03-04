@@ -1,23 +1,18 @@
-function [out, BER, SER] = M_PSK(in, M, SNR, encoding, show_plot)
+function [out, BER, SER] = M_PSK(inpt, M, SNR, encoding, show_plot)
+
+E_s=1;
 
 R = log2(M);
-
-E_s = 1;
 
 % We have 4 samples (T_sample) per carrier period (Tc) and
 % 2 carrier periods (Tc) per symbol period (T_sym).
 
-% Sampling period
+% T_scale = 4 * 10^-6;
+
 T_sample = 1;
-f_sample = 1;
-
-% Carrier period
-T_c = T_sample * 4;
-f_c = f_sample / 4;
-
-% Symbol period (based on target symbol ratio)
-T_sym = T_c * 2;
-f_sym = f_c * 2;
+T_c = 4;
+f_c = 1/T_c;
+T_sym = 40;
 
 g_t = sqrt(2 / T_sym);
 
@@ -30,11 +25,11 @@ end
 
 % -----------------------------Mapper--------------------------------------
 
-blocks_in = reshape(in, [], R);
+blocks_inpt = reshape(inpt.', R, []).';
 if strcmp(encoding, 'bin')
-    sm = bi2de(blocks_in, 'left-msb');
+    sm = bi2de(blocks_inpt, 'left-msb');
 else
-    sm = bi2de(blocks_in, 'left-msb');
+    sm = bi2de(blocks_inpt, 'left-msb');
     sm = bin2gray(sm, 'psk', M);
 end
 
@@ -134,10 +129,10 @@ else
     blocks_out=de2bi(decision,R,'left-msb');
 end
 
-output_sequence=reshape(blocks_out,[],1);
+output_sequence=reshape(blocks_out.',[],1);
 
-k=in(in~=output_sequence);
-BER=length(k)/length(in);
+k=inpt(inpt~=output_sequence);
+BER=length(k)/length(inpt);
 out=output_sequence;
 SER=errorsym/totalsymb;
 
